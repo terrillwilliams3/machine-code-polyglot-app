@@ -36,16 +36,13 @@ AI Backend: Google Gemini API (via REST)
 
 Since this is a client-side application, no installation or package manager (npm/pip) is required.
 
-Clone the repository:
+Clone the repository-
 
-git clone [https://github.com/YOUR_USERNAME/machine-code-polyglot.git](https://github.com/YOUR_USERNAME/machine-code-polyglot.git)
+Open the application-
 
+Navigate to the project folder-
 
-Open the application:
-
-Navigate to the project folder.
-
-Open maelstrom_translator.html (or whatever you named the file) in any modern web browser.
+Open machine_code_polyglot.html in any modern web browser.
 
 Pro Tip: In VS Code, use the "Live Server" extension for the best experience.
 
@@ -64,6 +61,12 @@ Watch it Happen: After a short pause (1.5 seconds), the neural link will activat
 ⚠️ Note on Security
 
 This application runs entirely in your browser. Your API key is sent directly from your browser to Google's servers. It is never stored on any other server or backend.
+
+👤 Author:
+
+LinkedIn: https://www.linkedin.com/in/Terrill-Williams-Verified/
+
+GitHub: @terrillwilliams3
 
 📄 License
 
