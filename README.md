@@ -42,7 +42,7 @@ Open the application-
 
 Navigate to the project folder-
 
-Open machine_code_polyglot.html in any modern web browser.
+Open index.html in any modern web browser.
 
 Pro Tip: In VS Code, use the "Live Server" extension for the best experience.
 
