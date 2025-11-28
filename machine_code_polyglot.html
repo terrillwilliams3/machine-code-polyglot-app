@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MACHINE CODE POLYGLOT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --maelstrom-red: #ff1f1f;
+            --maelstrom-dark: #050505;
+            --maelstrom-grey: #1a1a1a;
+            --maelstrom-chrome: #555;
+            --glitch-offset: 2px;
+        }
+
+        body {
+            background-color: var(--maelstrom-dark);
+            color: var(--maelstrom-red);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.95)),
+                repeating-linear-gradient(0deg, transparent, transparent 1px, #ff1f1f05 1px, #ff1f1f05 2px);
+            background-size: cover;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--maelstrom-red); border: 1px solid #000; }
+
+        /* Maelstrom Card Styling */
+        .cyber-card {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(0,0,0,0.8);
+        }
+
+        .cyber-card::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px;
+            width: 10px; height: 10px;
+            border-top: 2px solid var(--maelstrom-red);
+            border-left: 2px solid var(--maelstrom-red);
+            transition: all 0.3s;
+        }
+
+        .cyber-card::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; right: -1px;
+            width: 10px; height: 10px;
+            border-bottom: 2px solid var(--maelstrom-red);
+            border-right: 2px solid var(--maelstrom-red);
+            transition: all 0.3s;
+        }
+
+        .cyber-card.active-input {
+            border-color: var(--maelstrom-red);
+            box-shadow: 0 0 15px rgba(255, 31, 31, 0.2);
+        }
+
+        .cyber-card.active-input::before,
+        .cyber-card.active-input::after {
+            width: 100%; height: 100%;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Glitch Text Effect */
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--maelstrom-dark);
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -1px 0 #00ffff;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -1px 0 #ff00ff;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 30px, 0); }
+            20% { clip: rect(80px, 9999px, 100px, 0); }
+            40% { clip: rect(30px, 9999px, 60px, 0); }
+            60% { clip: rect(90px, 9999px, 120px, 0); }
+            80% { clip: rect(20px, 9999px, 50px, 0); }
+            100% { clip: rect(60px, 9999px, 80px, 0); }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(60px, 9999px, 90px, 0); }
+            20% { clip: rect(10px, 9999px, 40px, 0); }
+            40% { clip: rect(90px, 9999px, 120px, 0); }
+            60% { clip: rect(30px, 9999px, 50px, 0); }
+            80% { clip: rect(70px, 9999px, 100px, 0); }
+            100% { clip: rect(20px, 9999px, 40px, 0); }
+        }
+
+        /* Inputs */
+        textarea {
+            background-color: #080808;
+            color: #ddd;
+            border: none;
+            width: 100%;
+            height: 100%;
+            resize: none;
+            padding: 1rem;
+            font-family: 'Share Tech Mono', monospace;
+            outline: none;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        textarea:focus {
+            background-color: #0d0d0d;
+        }
+
+        .active-input textarea {
+            color: #fff;
+            background-color: #111;
+        }
+
+        select, input[type="password"] {
+            background: #000;
+            border: 1px solid #444;
+            color: var(--maelstrom-red);
+            padding: 5px 10px;
+            font-family: 'Share Tech Mono', monospace;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--maelstrom-red);
+        }
+
+        /* Buttons */
+        .btn-cyber {
+            background: transparent;
+            border: 1px solid var(--maelstrom-red);
+            color: var(--maelstrom-red);
+            text-transform: uppercase;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-cyber:hover {
+            background: var(--maelstrom-red);
+            color: #000;
+            box-shadow: 0 0 10px var(--maelstrom-red);
+        }
+
+        .loader-line {
+            width: 100%;
+            height: 2px;
+            background: transparent;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            overflow: hidden;
+        }
+
+        .loader-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--maelstrom-red);
+            animation: loading 2s infinite ease-in-out;
+            opacity: 0;
+        }
+
+        .is-loading .loader-line::after {
+            opacity: 1;
+        }
+
+        @keyframes loading {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .status-light {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #333;
+            box-shadow: 0 0 2px #333;
+            transition: 0.3s;
+        }
+        
+        .status-light.online {
+            background-color: var(--maelstrom-red);
+            box-shadow: 0 0 8px var(--maelstrom-red);
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4">
+
+        <!-- Header / Control Panel -->
+        <!--
+                Top control area for authentication and selecting the source language.
+                - `API Key` input is a client-side password field. The app reads this
+                    value and sends it directly to the remote model endpoint. This is
+                    appropriate for quick demos only; do not embed production secrets in
+                    client-side code. Use a server-side proxy in real deployments.
+                - `Source Protocol` determines which language card is editable (the
+                    active source). Switching it toggles UI state for both the source
+                    card and the corresponding textarea (read/write).
+                - IDs and naming conventions: controls and cards use predictable IDs
+                    (e.g. `card-Python`, `input-Python`) that JS depends on. Avoid
+                    renaming DOM IDs unless you update the JS accordingly.
+        -->
+    <header class="mb-6 border-b border-gray-800 pb-4">
+        <div class="flex flex-col md:flex-row justify-between items-end md:items-center gap-4">
+            <div>
+                <h1 class="text-4xl uppercase tracking-widest glitch-text font-bold" data-text="MACHINE CODE POLYGLOT">
+                    MACHINE CODE POLYGLOT
+                </h1>
+                <p class="text-xs text-gray-500 mt-1 tracking-[0.2em]">NEURAL LINK STATUS: <span id="status-text">OFFLINE</span></p>
+            </div>
+
+            <div class="flex flex-col gap-2 items-end">
+                <div class="flex items-center gap-2">
+                    <label class="text-xs uppercase text-gray-500">API Key:</label>
+                    <input type="password" id="api-key" placeholder="Paste Gemini API Key" class="w-48 text-sm">
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs uppercase text-gray-500">Source Protocol:</label>
+                    <select id="source-lang" onchange="changeSourceLang()">
+                        <option value="Python">PYTHON</option>
+                        <option value="JavaScript">JAVASCRIPT</option>
+                        <option value="C">C</option>
+                        <option value="C++">C++</option>
+                        <option value="Java">JAVA</option>
+                        <option value="Go">GO</option>
+                        <option value="Rust">RUST</option>
+                        <option value="HTML">HTML</option>
+                        <option value="CSS">CSS</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Grid -->
+    <!--
+        Responsive grid that holds one card per language from the
+        `languages` array. Cards are created dynamically by `initGrid()` so
+        that ID and class wiring remains consistent; do not duplicate card
+        HTML elsewhere in the file or it may break DOM lookups.
+        Each card contains:
+         - a status light (`.status-light`) that shows the active/source card
+           via the `online` class,
+         - a copy button that copies the card textarea contents to clipboard,
+         - a textarea named `input-<LANG>` (read-only for non-source languages),
+         - a `.loader-line` used to show per-card loading animations.
+    -->
+    <main class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full">
+        <!-- The 9 Windows will be generated here -->
+    </main>
+
+    <!-- Hidden Footer/Status -->
+    <!--
+        Global progress element. This top-fixed progress bar is a coarse
+        indicator and is independent from per-card loader lines. It's kept
+        minimalist: JS may expand `#progress-bar` width or toggle classes to
+        indicate overall network activity. It is intentionally non-blocking
+        and purely visual—no behavior depends on this element existing.
+    -->
+    <div id="global-loader" class="fixed top-0 left-0 w-full h-1 bg-transparent z-50">
+        <div class="h-full bg-red-600 w-0 transition-all duration-300" id="progress-bar"></div>
+    </div>
+
+    <script>
+        // Supported languages. The app constructs DOM IDs and expects JSON
+        // responses that use these exact language names (excluding the
+        // `currentSource`). Keep this list and the `source-lang` <select>
+        // options in sync if you add/remove languages.
+        const languages = ['C', 'C++', 'Python', 'Go', 'Rust', 'JavaScript', 'Java', 'HTML', 'CSS'];
+        // Currently selected (editable) language. The corresponding textarea
+        // becomes writable; all other textareas are read-only targets.
+        let currentSource = 'Python';
+        // Debounce timer used to delay API calls until user pauses typing.
+        let debounceTimer;
+
+        // Build the UI grid programmatically. We generate cards to ensure
+        // every element ID follows the predictable pattern `card-<LANG>` and
+        // `input-<LANG>`, which other functions rely upon for lookups.
+        function initGrid() {
+            const main = document.querySelector('main');
+            main.innerHTML = '';
+
+            languages.forEach(lang => {
+                const isSource = lang === currentSource;
+                const card = document.createElement('div');
+                card.className = `cyber-card flex flex-col h-64 md:h-80 ${isSource ? 'active-input' : ''}`;
+                card.id = `card-${lang}`;
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center p-2 bg-black/50 border-b border-gray-800">
+                        <div class="flex items-center gap-2">
+                            <div class="status-light ${isSource ? 'online' : ''}"></div>
+                            <span class="font-bold text-sm tracking-wider text-gray-300">${lang.toUpperCase()}</span>
+                        </div>
+                        <button onclick="copyCode('${lang}')" class="btn-cyber" title="Copy Data">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="relative flex-grow">
+                        <textarea 
+                            id="input-${lang}" 
+                            ${isSource ? '' : 'readonly'}
+                            placeholder="${isSource ? 'INITIATE CODE SEQUENCE...' : 'WAITING FOR DATA STREAM...'}"
+                            oninput="handleInput('${lang}')"
+                            spellcheck="false"
+                        ></textarea>
+                        <div class="loader-line" id="loader-${lang}"></div>
+                    </div>
+                `;
+                main.appendChild(card);
+            });
+        }
+
+        function changeSourceLang() {
+            const select = document.getElementById('source-lang');
+            const oldSource = currentSource;
+            currentSource = select.value;
+
+            // Update UI styles
+            document.getElementById(`card-${oldSource}`).classList.remove('active-input');
+            document.getElementById(`input-${oldSource}`).setAttribute('readonly', true);
+            document.getElementById(`card-${oldSource}`).querySelector('.status-light').classList.remove('online');
+
+            document.getElementById(`card-${currentSource}`).classList.add('active-input');
+            document.getElementById(`input-${currentSource}`).removeAttribute('readonly');
+            document.getElementById(`card-${currentSource}`).querySelector('.status-light').classList.add('online');
+            
+            // Clear placeholder
+            document.getElementById(`input-${currentSource}`).placeholder = "INITIATE CODE SEQUENCE...";
+        }
+
+        function handleInput(lang) {
+            if (lang !== currentSource) return;
+            
+            clearTimeout(debounceTimer);
+            
+            const statusText = document.getElementById('status-text');
+            statusText.innerText = "INPUT DETECTED...";
+            statusText.style.color = "#fff";
+
+            debounceTimer = setTimeout(() => {
+                translateCode();
+            }, 1500); // 1.5s debounce
+        }
+
+        async function translateCode() {
+            const apiKey = document.getElementById('api-key').value;
+            const sourceCode = document.getElementById(`input-${currentSource}`).value;
+            const statusText = document.getElementById('status-text');
+
+            if (!sourceCode.trim()) return;
+
+            if (!apiKey) {
+                alert("ACCESS DENIED: API KEY REQUIRED");
+                statusText.innerText = "AUTH FAILED";
+                statusText.style.color = "red";
+                return;
+            }
+
+            // Set loading state: update global status text and enable per-card
+            // loading visuals. Per-card `.is-loading` is attached to the
+            // textarea container so CSS can animate the `.loader-line::after`.
+            // This is purely visual and does not affect the request itself.
+            statusText.innerText = "TRANSMITTING TO NET...";
+            statusText.style.color = "#ff1f1f";
+            languages.forEach(lang => {
+                if (lang !== currentSource) {
+                    document.getElementById(`loader-${lang}`).parentElement.classList.add('is-loading');
+                }
+            });
+
+            // Prepare prompt: craft the instruction sent to the generative
+            // model. IMPORTANT: we explicitly ask for a raw JSON object so the
+            // client can safely JSON.parse() the response. The prompt also
+            // lists the expected keys (languages) to reduce the chance of
+            // model hallucination or format drift.
+            const prompt = `
+                You are a code translation engine. 
+                Translate the following ${currentSource} code into: ${languages.filter(l => l !== currentSource).join(', ')}.
+                
+                Source Code:
+                ${sourceCode}
+
+                IMPORTANT: Return ONLY a raw JSON object. Do not use Markdown blocks.
+                The keys must be exactly: ${JSON.stringify(languages.filter(l => l !== currentSource))}
+                The values must be the translated code.
+                If a language is not applicable (e.g. converting Python logic to CSS), provide a comment explaining why or a conceptual representation.
+            `;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: prompt }]
+                        }],
+                        generationConfig: {
+                            responseMimeType: "application/json"
+                        }
+                    })
+                });
+
+                if (!response.ok) throw new Error("Network Protocol Error");
+
+                const data = await response.json();
+                const resultText = data.candidates[0].content.parts[0].text;
+                const translations = JSON.parse(resultText);
+
+                // Update UI: populate target textareas from the model's JSON
+                // response. The model is expected to return a raw JSON object
+                // whose keys match the language names (excluding the source).
+                // We defensively check that each textarea exists before
+                // assigning to avoid runtime errors if DOM structure changes.
+                Object.keys(translations).forEach(lang => {
+                    const textarea = document.getElementById(`input-${lang}`);
+                    if (textarea) {
+                        textarea.value = translations[lang];
+                    }
+                });
+
+                statusText.innerText = "DATA SYNCHRONIZED";
+                statusText.style.color = "#00ff00";
+
+            } catch (error) {
+                // Log error for debugging. In production you may want to show a
+                // user-friendly message and report the error to telemetry.
+                console.error(error);
+                statusText.innerText = "CONNECTION SEVERED";
+            } finally {
+                // Remove loading state visuals regardless of success or failure.
+                // We remove the `.is-loading` class from each card's container so
+                // the `.loader-line::after` CSS animation is hidden again.
+                languages.forEach(lang => {
+                    document.getElementById(`loader-${lang}`).parentElement.classList.remove('is-loading');
+                });
+            }
+        }
+
+        function copyCode(lang) {
+            const textarea = document.getElementById(`input-${lang}`);
+            textarea.select();
+            document.execCommand('copy'); // Fallback for iframe security
+            
+            // Visual feedback: temporarily replace the copy button icon with
+            // a checkmark so users know the text was copied. We restore the
+            // original HTML after a short timeout.
+            const btn = document.querySelector(`#card-${lang} .btn-cyber`);
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => btn.innerHTML = originalHTML, 1000);
+        }
+
+        // Initialize: construct the language cards and wire up initial
+        // visual state. No network requests are made during initialization.
+        initGrid();
+    </script>
+</body>
+</html>
