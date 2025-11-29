@@ -119,7 +119,7 @@
             100% { clip: rect(20px, 9999px, 40px, 0); }
         }
 
-        /* Inputs */
+        /* Inputs - ALIGNMENT RESTORED TO 16px/15px */
         textarea {
             background-color: #080808;
             color: #ddd !important; /* FORCE WHITE TEXT */
@@ -127,11 +127,15 @@
             width: 100%;
             height: 100%;
             resize: none;
-            padding: 1rem;
-            font-family: 'Share Tech Mono', monospace;
+            /* 16px standard padding - The Anchor */
+            padding: 16px 8px 16px 8px !important;
+            font-family: 'Share Tech Mono', monospace !important;
             outline: none;
-            font-size: 0.9rem;
-            line-height: 1.4;
+            font-size: 14px !important;
+            line-height: 24px !important;
+            margin: 0 !important;
+            flex: 1; 
+            vertical-align: top;
         }
 
         textarea:focus {
@@ -141,6 +145,32 @@
         .active-input textarea {
             color: #fff !important; /* ENSURING WHITE TEXT FOR ACTIVE INPUT */
             background-color: #111;
+            padding: 16px 8px 16px 8px !important; 
+        }
+
+        /* Line Numbers - ALIGNMENT RESTORED TO 16px/15px */
+        .editor-container {
+            display: flex;
+            height: 100%;
+            position: relative;
+            align-items: stretch; 
+        }
+
+        .line-numbers {
+            background-color: #0a0a0a;
+            color: #555;
+            text-align: right;
+            /* 15px Padding (1px less than Textarea) - The Magic Offset */
+            padding: 15px 8px 16px 8px !important;
+            font-family: 'Share Tech Mono', monospace !important;
+            font-size: 14px !important;
+            line-height: 24px !important;
+            border-right: 1px solid #333;
+            width: 3rem;
+            flex-shrink: 0;
+            overflow: hidden;
+            user-select: none;
+            vertical-align: top;
         }
 
         select, input[type="password"] {
@@ -222,9 +252,20 @@
             box-shadow: 0 0 8px var(--maelstrom-red);
         }
 
+        /* Telemetry Footer Styling */
+        .telemetry-bar {
+            border-top: 1px solid #333;
+            font-size: 0.7rem;
+            color: #666;
+            background: #050505;
+        }
+        .telemetry-item strong {
+            color: var(--maelstrom-red);
+        }
+
     </style>
 </head>
-<body class="min-h-screen flex flex-col p-4">
+<body class="min-h-screen flex flex-col p-4 pb-0">
 
     <!-- Header / Control Panel -->
     <!--
@@ -257,8 +298,9 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <label class="text-xs uppercase text-gray-500">Source Protocol:</label>
-                    <!-- Flex container to hold select and reset button -->
                     <div class="flex gap-2">
+                        <!-- Voice Button Removed per request -->
+                        
                         <select id="source-lang" onchange="changeSourceLang()">
                             <option value="Python">PYTHON</option>
                             <option value="JavaScript">JAVASCRIPT</option>
@@ -293,9 +335,21 @@
          - a textarea named `input-<LANG>` (read-only for non-source languages),
          - a `.loader-line` used to show per-card loading animations.
     -->
-    <main class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full">
+    <main class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <!-- The 9 Windows will be generated here -->
     </main>
+
+    <!-- Telemetry Footer -->
+    <footer class="fixed bottom-0 left-0 w-full p-2 telemetry-bar flex justify-between px-4 z-40">
+        <div class="flex gap-6">
+            <span class="telemetry-item">LATENCY: <strong id="metric-latency">0ms</strong></span>
+            <span class="telemetry-item">EST. TOKENS: <strong id="metric-tokens">0</strong></span>
+        </div>
+        <div class="flex gap-6">
+            <span class="telemetry-item">CORE: <strong>GEMINI-2.5-FLASH</strong></span>
+            <span class="telemetry-item">VERSION: <strong>2.1.0</strong></span>
+        </div>
+    </footer>
 
     <!-- Hidden Footer/Status -->
     <!--
@@ -315,6 +369,13 @@
         // `currentSource`). Keep this list and the `source-lang` <select>
         // options in sync if you add/remove languages.
         const languages = ['C', 'C++', 'Python', 'Go', 'Rust', 'JavaScript', 'Java', 'HTML', 'CSS'];
+        
+        // Map language names to file extensions for the Download feature
+        const fileExtensions = {
+            'C': 'c', 'C++': 'cpp', 'Python': 'py', 'Go': 'go', 
+            'Rust': 'rs', 'JavaScript': 'js', 'Java': 'java', 'HTML': 'html', 'CSS': 'css'
+        };
+
         // Currently selected (editable) language. The corresponding textarea
         // becomes writable; all other textareas are read-only targets.
         let currentSource = 'Python';
@@ -324,34 +385,53 @@
         // Build the UI grid programmatically. We generate cards to ensure
         // every element ID follows the predictable pattern `card-<LANG>` and
         // `input-<LANG>`, which other functions rely upon for lookups.
+        // UPDATED: Now sorts the grid so the currentSource is always first.
         function initGrid() {
             const main = document.querySelector('main');
             main.innerHTML = '';
 
-            languages.forEach(lang => {
+            // Sort languages to put currentSource at index 0
+            const orderedLanguages = [
+                currentSource, 
+                ...languages.filter(l => l !== currentSource)
+            ];
+
+            orderedLanguages.forEach(lang => {
                 const isSource = lang === currentSource;
                 const card = document.createElement('div');
                 card.className = `cyber-card flex flex-col h-64 md:h-80 ${isSource ? 'active-input' : ''}`;
                 card.id = `card-${lang}`;
 
+                // HTML Structure includes Download button and Line Numbers
                 card.innerHTML = `
                     <div class="flex justify-between items-center p-2 bg-black/50 border-b border-gray-800">
                         <div class="flex items-center gap-2">
                             <div class="status-light ${isSource ? 'online' : ''}"></div>
                             <span class="font-bold text-sm tracking-wider text-gray-300">${lang.toUpperCase()}</span>
                         </div>
-                        <button onclick="copyCode('${lang}')" class="btn-cyber" title="Copy Data">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                        <div class="flex gap-1">
+                            <!-- Download Button -->
+                            <button onclick="downloadCode('${lang}')" class="btn-cyber" title="Download File">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button onclick="copyCode('${lang}')" class="btn-cyber" title="Copy Data">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="relative flex-grow">
-                        <textarea 
-                            id="input-${lang}" 
-                            ${isSource ? '' : 'readonly'}
-                            placeholder="${isSource ? 'INITIATE CODE SEQUENCE...' : 'WAITING FOR DATA STREAM...'}"
-                            oninput="handleInput('${lang}')"
-                            spellcheck="false"
-                        ></textarea>
+                        <!-- Container for Line Numbers + Textarea -->
+                        <div class="editor-container">
+                            <div id="lines-${lang}" class="line-numbers">1</div>
+                            <textarea 
+                                id="input-${lang}" 
+                                ${isSource ? '' : 'readonly'}
+                                placeholder="${isSource ? 'INITIATE CODE SEQUENCE...' : 'WAITING FOR DATA STREAM...'}"
+                                oninput="handleInput('${lang}')"
+                                onscroll="syncScroll('${lang}')"
+                                spellcheck="false"
+                            ></textarea>
+                        </div>
                         <div class="loader-line" id="loader-${lang}"></div>
                     </div>
                 `;
@@ -359,27 +439,61 @@
             });
         }
 
+        // Syncs the line number column scroll with the textarea scroll
+        function syncScroll(lang) {
+            const textarea = document.getElementById(`input-${lang}`);
+            const linesDiv = document.getElementById(`lines-${lang}`);
+            linesDiv.scrollTop = textarea.scrollTop;
+        }
+
+        // Updates the line numbers based on the line count of the text
+        function updateLineNumbers(lang) {
+            const textarea = document.getElementById(`input-${lang}`);
+            const linesDiv = document.getElementById(`lines-${lang}`);
+            const lineCount = textarea.value.split('\n').length;
+            
+            // Generate line number string "1\n2\n3..."
+            linesDiv.innerHTML = Array(lineCount).fill(0).map((_, i) => i + 1).join('<br>');
+        }
+
+        // Download File Logic
+        function downloadCode(lang) {
+            const code = document.getElementById(`input-${lang}`).value;
+            if (!code.trim()) return;
+
+            const extension = fileExtensions[lang] || 'txt';
+            const filename = `polyglot_${lang.toLowerCase()}.${extension}`;
+            
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(code));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
         function changeSourceLang() {
             const select = document.getElementById('source-lang');
             const oldSource = currentSource;
             currentSource = select.value;
 
-            // Update UI styles
-            document.getElementById(`card-${oldSource}`).classList.remove('active-input');
-            document.getElementById(`input-${oldSource}`).setAttribute('readonly', true);
-            document.getElementById(`card-${oldSource}`).querySelector('.status-light').classList.remove('online');
-
-            document.getElementById(`card-${currentSource}`).classList.add('active-input');
-            document.getElementById(`input-${currentSource}`).removeAttribute('readonly');
-            document.getElementById(`card-${currentSource}`).querySelector('.status-light').classList.add('online');
+            // Re-initialize grid to move the new source to the first position
+            initGrid();
             
-            // Clear placeholder
+            // Restore any text that might have been there? 
+            // For simplicity in this architecture, we wipe to avoid confusion, 
+            // or rely on the fact that changing source usually implies starting a new task.
+            // But to keep it clean, we'll reset interface state visually.
             document.getElementById(`input-${currentSource}`).placeholder = "INITIATE CODE SEQUENCE...";
         }
 
         function handleInput(lang) {
             if (lang !== currentSource) return;
             
+            // Update line numbers immediately on input
+            updateLineNumbers(lang);
+
             clearTimeout(debounceTimer);
             
             const sourceCode = document.getElementById(`input-${currentSource}`).value;
@@ -401,22 +515,28 @@
         }
 
         // Function to clear all fields and reset status
-        // clearSource: boolean (true if we want to wipe the input box too)
+        // clearSource: boolean (true if the input box should also be wiped)
         function resetInterface(clearSource) {
             const statusText = document.getElementById('status-text');
             statusText.innerText = "OFFLINE";
             statusText.style.color = "gray"; // Revert status color
+
+            // Reset Telemetry
+            document.getElementById('metric-latency').innerText = "0ms";
+            document.getElementById('metric-tokens').innerText = "0";
 
             languages.forEach(lang => {
                 // Clear all OTHER windows
                 if (lang !== currentSource) {
                     const textarea = document.getElementById(`input-${lang}`);
                     if (textarea) textarea.value = "";
+                    updateLineNumbers(lang); // Reset lines
                 }
                 // Clear CURRENT window only if explicitly requested (e.g. via Reset button)
                 if (clearSource && lang === currentSource) {
                     const textarea = document.getElementById(`input-${lang}`);
                     if (textarea) textarea.value = "";
+                    updateLineNumbers(lang); // Reset lines
                 }
             });
         }
@@ -425,6 +545,9 @@
             const apiKey = document.getElementById('api-key').value;
             const sourceCode = document.getElementById(`input-${currentSource}`).value;
             const statusText = document.getElementById('status-text');
+
+            // Start Timer for Telemetry
+            const startTime = performance.now();
 
             if (!sourceCode.trim()) return;
 
@@ -484,7 +607,19 @@
                 if (!response.ok) throw new Error("Network Protocol Error");
 
                 const data = await response.json();
+                
+                // End Timer and Calc Latency
+                const endTime = performance.now();
+                const latency = Math.round(endTime - startTime);
+                document.getElementById('metric-latency').innerText = `${latency}ms`;
+
                 const resultText = data.candidates[0].content.parts[0].text;
+                
+                // Estimate Tokens (Roughly 4 chars per token)
+                const totalChars = resultText.length + sourceCode.length;
+                const estTokens = Math.round(totalChars / 4);
+                document.getElementById('metric-tokens').innerText = estTokens;
+
                 const translations = JSON.parse(resultText);
 
                 // Update UI: populate target textareas from the model's JSON
@@ -496,6 +631,8 @@
                     const textarea = document.getElementById(`input-${lang}`);
                     if (textarea) {
                         textarea.value = translations[lang];
+                        // Update line numbers for the translated code
+                        updateLineNumbers(lang);
                     }
                 });
 
@@ -526,9 +663,14 @@
             // a checkmark so users know the text was copied. We restore the
             // original HTML after a short timeout.
             const btn = document.querySelector(`#card-${lang} .btn-cyber`);
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i>';
-            setTimeout(() => btn.innerHTML = originalHTML, 1000);
+            // Avoid overwriting the icon if it's currently showing checkmark
+            // We just grab the first button which is copy if download is present
+            // Wait, we have two buttons now. We need to target the copy button specifically.
+            // Using title attribute selector to be safe.
+            const copyBtn = document.querySelector(`#card-${lang} button[title="Copy Data"]`);
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => copyBtn.innerHTML = originalHTML, 1000);
         }
 
         // Initialize: construct the language cards and wire up initial

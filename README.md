@@ -20,6 +20,12 @@ Cyberpunk UI: Custom CSS animations, glitch text effects, and a responsive grid 
 
 Single File Architecture: The entire app runs from a single HTML file—no build steps or complex backend required.
 
+Data Extraction: Download translated code files directly with a single click (.py, .c, .js, etc.).
+
+System Telemetry: Real-time monitoring footer displays API latency (ms) and estimated token usage.
+
+Smart Editor: Includes line numbering and auto-indentation awareness for a comfortable coding experience.
+
 🛠️ Technologies Used
 
 Core: HTML5, JavaScript (ES6+)
@@ -52,11 +58,15 @@ Get an API Key: You need a free API key from Google AI Studio.
 
 Enter Credentials: Paste your API key into the input field at the top right of the app.
 
-Select Protocol: Choose your input language (e.g., Python) from the dropdown menu.
+Select Protocol: Choose your input language (e.g., Python) from the dropdown menu. The selected language will automatically shift to the first slot in the grid.
 
 Write Code: Type your code in the active window (marked with a red border).
 
-Watch it Happen: After a short pause (1.5 seconds), the neural link will activate, and the translation engine will populate the other 8 windows.
+Watch it Happen: After a short pause (1.5 seconds), the Polyglot System Status will activate, and the translation engine will populate the other 8 windows.
+
+Reset: Use the RESET button in the header to clear all input and output fields instantly.
+
+Download: Click the download icon 📥 on any code window to save that specific snippet as a file.
 
 ⚠️ Note on Security
 
@@ -71,5 +81,3 @@ GitHub: @terrillwilliams3
 📄 License
 
 This project is open source and available under the MIT License.
-
-Built with code and chrome.
