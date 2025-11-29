@@ -68,6 +68,9 @@ Reset: Use the RESET button in the header to clear all input and output fields i
 
 Download: Click the download icon 📥 on any code window to save that specific snippet as a file.
 
+Note: If you have an IDE like VS Code configured as your default editor, the downloaded file will open automatically, allowing you to continue working on your project immediately.
+
+
 ⚠️ Note on Security
 
 This application runs entirely in your browser. Your API key is sent directly from your browser to Google's servers. It is never stored on any other server or backend.
